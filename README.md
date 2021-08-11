@@ -19,7 +19,20 @@ git clone http://github.com/markamdev/user-mover
 
 ## Usage
 
+### Saving user data
+
+### Restoring user data on new system
+
 **TODO** put some usage examples
+
+## Planned extensions
+
+*TODO* list for project contains following items:
+
+* saving and restoring user groups
+* checking/saving *sudo* permissions
+* multiple users saving at one `save-user.sh` call
+* output path configuration
 
 ## Author
 
