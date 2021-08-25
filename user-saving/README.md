@@ -7,6 +7,7 @@ Currently the tool is able to:
 * check user's id and home dir
 * save full user's home dir in .tar.gz file
 * save user's password (hashed value from /etc/shadow) to be used on new machine
+* save list of user groups
 
 ## Installation
 
@@ -29,7 +30,7 @@ git clone http://github.com/markamdev/user-mover
 
 *TODO* list for project contains following items:
 
-* saving and restoring user groups
+* restoring user groups
 * checking/saving *sudo* permissions
 * multiple users saving at one `save-user.sh` call
 * output path configuration

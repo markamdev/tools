@@ -29,6 +29,7 @@ HOMEDIR=$(echo $USERLINE| cut -d':' -f 6)
 USERSHELL=$(echo $USERLINE| cut -d':' -f 7)
 PASSWORD=$(grep $USERNAME /etc/shadow | cut -d":" -f2)
 
+echo "Saving user configuration"
 echo "- homedir: $HOMEDIR"
 echo "- shell: $USERSHELL"
 echo "- comment: $COMMENT"
@@ -49,6 +50,10 @@ echo "HOME:$HOMEDIR" >> $USERNAME/backup.conf
 echo "SHELL:$USERSHELL" >> $USERNAME/backup.conf
 echo "COMMENT:$COMMENT" >> $USERNAME/backup.conf
 echo "PASS:$PASSWORD" >> $USERNAME/backup.conf
+
+echo "Saving user groups ..."
+touch $USERNAME/groups.list
+grep $USERNAME /etc/group | cut -f1 -d ":" > $USERNAME/groups.list
 
 echo "Saving homedir - this can take a long time ..."
 LOCATION=`dirname $HOMEDIR`
