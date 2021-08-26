@@ -12,6 +12,8 @@ then
     exit 1
 fi
 
+SCRIPTDIR=$(dirname $0)
+
 USERNAME=$1
 
 echo "Saving account for user '$USERNAME'"
@@ -60,12 +62,12 @@ LOCATION=`dirname $HOMEDIR`
 OUTPUT=$PWD/$USERNAME
 
 (
-    cd $LOCATION
-    tar czf $OUTPUT/home.tar.gz $USERNAME
+    cd $HOMEDIR
+    tar czf $OUTPUT/home.tar.gz ./
 )
 
 echo "Copying restore script"
 # TODO check script's location (can be called from other location)
-cp restore-user.sh $USERNAME/
+cp $SCRIPTDIR/restore-user.sh $USERNAME/
 
 echo "All operations done!"
