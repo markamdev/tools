@@ -25,7 +25,13 @@ COMMENT=`cat $CONF | grep COMMENT | cut -f2 -d":"`
 PASS=`cat $CONF | grep PASS | cut -f2 -d":"`
 
 echo "Creating user account ..."
-useradd -s $USERSHELL -p \'$PASS\' -c \"$COMMENT\" -m $USERNAME
+useradd -s $USERSHELL -p "$PASS" -c "$COMMENT" -m $USERNAME
+
+if [ $? -ne 0 ];
+then
+    echo "Failed to add user $USERNAME with comment '$COMMENT'"
+    exit 1
+fi
 
 echo "Adding user to selected groups ..."
 for grp in `cat $GRPS`
@@ -43,6 +49,12 @@ done
 echo "Extracting user home directory data ..."
 USERHOME=$(grep $USERNAME /etc/passwd | cut -d':' -f6)
 tar -C $USERHOME -xf $DATA
+
+if [ $? -ne 0 ];
+then
+    echo "Failed extract home dir into $USERHOME"
+    exit 1
+fi
 
 chown -R $USERNAME:$USERNAME $USERHOME
 
