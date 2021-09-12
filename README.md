@@ -16,3 +16,8 @@ Pair of scripts for saving and restoring user account:
 ## [Go Kick-Off](go-kick-off)
 
 Script for automating creation of base files and directories for new Go project.
+
+## Author
+
+If you need to contact me feel free to write me an email:
+[markamdev.84#dontwantSPAM#gmail.com](maitlo:)
