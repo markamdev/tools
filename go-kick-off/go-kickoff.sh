@@ -1,6 +1,7 @@
 #!/bin/bash
 
 APP_NAME=$(basename "$0")
+APP_DIR=$(dirname "$0")
 
 function _checkOutdir() {
     if [ -z "$1" ]
@@ -8,14 +9,41 @@ function _checkOutdir() {
         echo "Invalid outdir: \"$1\""
         exit 1
     fi
-}
 
-function _initializeGit() {
-    echo "Initializing GIT repository"
+    if [ -e  "$1" ]
+    then
+        if [ ! -d "$1" ]
+        then
+            echo "Output path $1 exists but is not a directory"
+            exit 1
+        fi
+    else
+        mkdir -p "$1"
+        if [ "$?" -ne 0 ]
+        then
+            echo "Failed to create output directory: $1"
+            exit 1
+        fi
+    fi
 }
 
 function prepareSimple() {
-    echo "Preparing simple project"
+    echo "Preparing simple project in $1 (with files from $APP_DIR)"
+
+    (
+        cd "$1"
+        cp "$APP_DIR"/main-template.go ./main.go
+
+        BIN_NAME=$(basename "$1")
+        sed -i "s/APPLICATION/$BIN_NAME/" main.go
+
+        GO_FOUND=$(command -v go)
+        if [ -n "$GO_FOUND" ]
+        then
+            go mod init "$BIN_NAME" &>> /dev/null
+            go mod tidy &>> /dev/null
+        fi
+    )
 }
 
 function prepareMulti() {
@@ -39,7 +67,14 @@ function preparePackage() {
 }
 
 function gitInit() {
-    echo "Initializing repository and creating initial commit"
+    echo "Initializing repository in $1 and creating initial commit"
+    (
+        cd "$1"
+
+        git init . &>> /dev/null
+        git add ./* &>> /dev/null
+        git commit -m "Initial commit with application stub"
+    )
 }
 
 function printHelp() {
@@ -157,7 +192,7 @@ fi
 
 if [ $GIT_INIT -eq 1 ]
 then
-    _initializeGit "$OUTDIR"
+    gitInit "$OUTDIR"
 fi
 
 echo "Go project ready for development in $OUTDIR"
