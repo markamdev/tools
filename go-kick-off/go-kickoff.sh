@@ -54,6 +54,23 @@ function prepareMulti() {
         echo "Binary names not provided - please check --help"
         exit 1
     fi
+
+    (
+        cd "$1"
+
+        mkdir ./cmd
+        for binname in $(echo "$2" | tr "," " ")
+        do
+            echo "- preparing stub for $binname binary"
+            mkdir ./cmd/"$binname"
+            cp "$APP_DIR"/main-template.go ./cmd/"$binname"/main.go
+
+            sed -i "s/APPLICATION/$binname/" ./cmd/"$binname"/main.go
+        done
+
+        go mod init "$(basename "$1")" &>> /dev/null
+        go mod tidy &>> /dev/null
+    )
 }
 
 function preparePackage() {
