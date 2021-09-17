@@ -81,6 +81,17 @@ function preparePackage() {
         echo "Package name not provided - please check --help"
         exit 1
     fi
+
+    (
+        cd "$1"
+
+        cp "$APP_DIR"/package-template.go ./"$2".go
+
+        sed -i "s/PACKAGE/$2/" ./"$2".go
+
+        go mod init "$2" &>> /dev/null
+        go mod tidy &>> /dev/null
+    )
 }
 
 function gitInit() {
