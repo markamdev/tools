@@ -1,35 +1,35 @@
 #!/bin/bash
 
-if [ -z $1 ];
+if [ -z "$1" ];
 then
     echo "No username specifed"
     exit 1
 fi
 
-if [ `id -u` -ne 0 ];
+if [ "$(id -u)" -ne 0 ];
 then
     echo "Script has to be launched as root"
     exit 1
 fi
 
-SCRIPTDIR=$(dirname $0)
+SCRIPTDIR=$(dirname "$0")
 
-USERNAME=$1
+USERNAME="$1"
 
 echo "Saving account for user '$USERNAME'"
 
-USERLINE=`grep $USERNAME /etc/passwd`
+USERLINE=$(grep "$USERNAME" /etc/passwd)
 
-if [ $? -ne 0 ];
+if [ "$?" -ne 0 ];
 then
     echo "Failed to get user info from /etc/passwd. Does user $USERNAME exist?"
     exit 1
 fi
 
-COMMENT=$(echo $USERLINE| cut -d':' -f 5)
-HOMEDIR=$(echo $USERLINE| cut -d':' -f 6)
-USERSHELL=$(echo $USERLINE| cut -d':' -f 7)
-PASSWORD=$(grep $USERNAME /etc/shadow | cut -d":" -f2)
+COMMENT=$(echo "$USERLINE" | cut -d':' -f 5)
+HOMEDIR=$(echo "$USERLINE" | cut -d':' -f 6)
+USERSHELL=$(echo "$USERLINE" | cut -d':' -f 7)
+PASSWORD=$(grep "$USERNAME" /etc/shadow | cut -d":" -f2)
 
 echo "Saving user configuration"
 echo "- homedir: $HOMEDIR"
@@ -37,21 +37,23 @@ echo "- shell: $USERSHELL"
 echo "- comment: $COMMENT"
 echo "- password hash: $PASSWORD"
 
-if [ -d $USERNAME ];
+if [ -d "$USERNAME" ];
 then
     echo "Backup directory ./$USERNAME already exist"
     echo "Rename/remove it and launch script again"
     exit 1
 else
-    mkdir $USERNAME
+    mkdir "$USERNAME"
 fi
 
-touch $USERNAME/backup.conf
-echo "LOGIN:$USERNAME" >> "$USERNAME/backup.conf"
-echo "HOME:$HOMEDIR" >> "$USERNAME/backup.conf"
-echo "SHELL:$USERSHELL" >> "$USERNAME/backup.conf"
-echo "COMMENT:$COMMENT" >> "$USERNAME/backup.conf"
-echo "PASS:$PASSWORD" >> "$USERNAME/backup.conf"
+touch "$USERNAME"/backup.conf
+{
+    echo "LOGIN:$USERNAME";
+    echo "HOME:$HOMEDIR";
+    echo "SHELL:$USERSHELL";
+    echo "COMMENT:$COMMENT";
+    echo "PASS:$PASSWORD"
+} >> "$USERNAME/backup.conf"
 
 echo "Saving user groups ..."
 touch "$USERNAME/groups.list"
@@ -68,13 +70,11 @@ OUTPUT=$PWD/$USERNAME
 # check if user home directory is encrypted (and save encrypted data)
 if [[ -e "$HOMEDIR/.ecryptfs" && -e "$HOMEDIR/.Private" ]]
 then
-    echo "WARNING: This user has encrypted home directory. Rember to save password and/or decryption key !!"
+    echo "WARNING: This user has encrypted home directory. Remember to save password and/or decryption key !!"
     echo "ENCRYPTED:true" >> "$USERNAME/backup.conf"
 
-    ECRYPT_PATH=$(dirname $(realpath "$HOMEDIR/.ecryptfs") )
-    PRIVATE_PATH=$(dirname $(realpath "$HOMEDIR/.Private") )
-
-    echo "TEST: E_PATH->$ECRYPT_PATH P_PATH->$PRIVATE_PATH"
+    ECRYPT_PATH=$(dirname "$(realpath "$HOMEDIR/.ecryptfs")" )
+    PRIVATE_PATH=$(dirname "$(realpath "$HOMEDIR/.Private")" )
 
     (
         cd "$ECRYPT_PATH" || exit 1
