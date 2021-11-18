@@ -47,27 +47,48 @@ else
 fi
 
 touch $USERNAME/backup.conf
-echo "LOGIN:$USERNAME" >> $USERNAME/backup.conf
-echo "HOME:$HOMEDIR" >> $USERNAME/backup.conf
-echo "SHELL:$USERSHELL" >> $USERNAME/backup.conf
-echo "COMMENT:$COMMENT" >> $USERNAME/backup.conf
-echo "PASS:$PASSWORD" >> $USERNAME/backup.conf
+echo "LOGIN:$USERNAME" >> "$USERNAME/backup.conf"
+echo "HOME:$HOMEDIR" >> "$USERNAME/backup.conf"
+echo "SHELL:$USERSHELL" >> "$USERNAME/backup.conf"
+echo "COMMENT:$COMMENT" >> "$USERNAME/backup.conf"
+echo "PASS:$PASSWORD" >> "$USERNAME/backup.conf"
 
 echo "Saving user groups ..."
-touch $USERNAME/groups.list
-grep $USERNAME /etc/group | cut -f1 -d ":" > $USERNAME/groups.list
+touch "$USERNAME/groups.list"
+grep "$USERNAME" /etc/group | cut -f1 -d ":" > "$USERNAME/groups.list"
 
 echo "Saving homedir - this can take a long time ..."
-LOCATION=`dirname $HOMEDIR`
 OUTPUT=$PWD/$USERNAME
 
 (
-    cd $HOMEDIR
-    tar czf $OUTPUT/home.tar.gz ./
+    cd "$HOMEDIR" || exit 1
+    tar czf "$OUTPUT/home.tar.gz" ./
 )
+
+# check if user home directory is encrypted (and save encrypted data)
+if [[ -e "$HOMEDIR/.ecryptfs" && -e "$HOMEDIR/.Private" ]]
+then
+    echo "WARNING: This user has encrypted home directory. Rember to save password and/or decryption key !!"
+    echo "ENCRYPTED:true" >> "$USERNAME/backup.conf"
+
+    ECRYPT_PATH=$(dirname $(realpath "$HOMEDIR/.ecryptfs") )
+    PRIVATE_PATH=$(dirname $(realpath "$HOMEDIR/.Private") )
+
+    echo "TEST: E_PATH->$ECRYPT_PATH P_PATH->$PRIVATE_PATH"
+
+    (
+        cd "$ECRYPT_PATH" || exit 1
+        tar czf "$OUTPUT/ecrypt.tar.gz" ./.ecryptfs
+    )
+
+    (
+        cd "$PRIVATE_PATH" || exit 1
+        tar czf "$OUTPUT/private.tar.gz" ./.Private
+    )
+fi
 
 echo "Copying restore script"
 # TODO check script's location (can be called from other location)
-cp $SCRIPTDIR/restore-user.sh $USERNAME/
+cp "$SCRIPTDIR/restore-user.sh" "$USERNAME/"
 
 echo "All operations done!"
