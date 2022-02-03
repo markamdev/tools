@@ -1,8 +1,10 @@
 #!/bin/bash
 
-CONF=backup.conf
-DATA=home.tar.gz
-GRPS=groups.list
+CONF="backup.conf"
+DATA="home.tar.gz"
+GRPS="groups.list"
+ENC_ECRYPT="ecrypt.tar.gz"
+ENC_PRIVATE="private.tar.gz"
 
 if [ `id -u` -ne 0 ];
 then
@@ -23,6 +25,7 @@ echo "Trying to restore user: $USERNAME"
 USERSHELL=`cat $CONF | grep SHELL | cut -f2 -d":"`
 COMMENT=`cat $CONF | grep COMMENT | cut -f2 -d":"`
 PASS=`cat $CONF | grep PASS | cut -f2 -d":"`
+ENCRYPTED=`cat $CONF | grep ENCRYPTED | cut -f2 -d":"`
 
 echo "Creating user account ..."
 useradd -s $USERSHELL -p "$PASS" -c "$COMMENT" -m $USERNAME
@@ -52,10 +55,41 @@ tar -C $USERHOME -xf $DATA
 
 if [ $? -ne 0 ];
 then
-    echo "Failed extract home dir into $USERHOME"
+    echo "Failed to extract home dir into $USERHOME"
     exit 1
 fi
-
 chown -R $USERNAME:$USERNAME $USERHOME
+
+if [ "$ENCRYPTED" == "true" ];
+then
+    ECRYPTFS_HOME="/home/.ecryptfs"
+    echo "WARNING: This account has encryped home directory!"
+    if [[ ! -e "$ENC_ECRYPT" || ! -e "$ENC_PRIVATE" ]];
+    then
+        echo "ERROR: Data for enrypted home directory not found"
+        echo "ERROR: user account cannot be fully restored!"
+        exit 1
+    fi
+    TARGET="$ECRYPTFS_HOME/$USERNAME"
+    mkdir -p "$TARGET"
+
+    echo "-> extracting ecrypt package"
+    tar -C $TARGET -xf $ENC_ECRYPT
+    if [ $? -ne 0 ];
+    then
+        echo "Failed to extract into $TARGET"
+        exit 1
+    fi
+
+    echo "-> extracting Private package"
+    tar -C $TARGET -xf $ENC_PRIVATE
+    if [ $? -ne 0 ];
+    then
+        echo "Failed to extract into $TARGET"
+        exit 1
+    fi
+
+    chown -R $USERNAME:$USERNAME $TARGET
+fi
 
 echo "User data restored"
