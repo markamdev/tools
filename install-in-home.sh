@@ -15,19 +15,19 @@ mkdir -p "$INSTALL_DIR"
 
 echo "--> copying user-saving ..."
 cp -r ./user-saving "$INSTALL_DIR"
-echo "PATH=\$PATH:$INSTALL_DIR/user-saving" >> $INSTALL_DIR/paths.env
+echo "PATH=\$PATH:$INSTALL_DIR/user-saving" >> "$INSTALL_DIR/paths.env"
 
 echo "--> copying go-kick-off"
 cp -r ./go-kick-off "$INSTALL_DIR"
-echo "PATH=\$PATH:$INSTALL_DIR/go-kick-off" >> $INSTALL_DIR/paths.env
+echo "PATH=\$PATH:$INSTALL_DIR/go-kick-off" >> "$INSTALL_DIR/paths.env"
 
 echo "-> adding tools to user PATH"
-if [ ! -e "$HOME"/.bash_profile ]
+if [ ! -e "$HOME/.bashrc" ]
 then
-    touch "$HOME"/.bash_profile
+    touch "$HOME/.bashrc"
 fi
 
-PATH_ADDED=$(grep "$INSTALL_DIR" "$HOME"/.bashrc | wc -l)
+PATH_ADDED=$(grep -c "$INSTALL_DIR" "$HOME"/.bashrc)
 
 if [ "$PATH_ADDED" -eq 0 ]
 then
