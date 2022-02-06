@@ -64,7 +64,7 @@ OUTPUT=$PWD/$USERNAME
 
 (
     cd "$HOMEDIR" || exit 1
-    tar czf "$OUTPUT/home.tar.gz" ./
+    tar cf "$OUTPUT/home.tar" ./
 )
 
 # check if user home directory is encrypted (and save encrypted data)
@@ -78,12 +78,12 @@ then
 
     (
         cd "$ECRYPT_PATH" || exit 1
-        tar czf "$OUTPUT/ecrypt.tar.gz" ./.ecryptfs
+        tar cf "$OUTPUT/ecrypt.tar" ./.ecryptfs
     )
 
     (
         cd "$PRIVATE_PATH" || exit 1
-        tar czf "$OUTPUT/private.tar.gz" ./.Private
+        tar cf "$OUTPUT/private.tar" ./.Private
     )
 fi
 

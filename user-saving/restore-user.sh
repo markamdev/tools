@@ -1,10 +1,10 @@
 #!/bin/bash
 
 CONF="backup.conf"
-DATA="home.tar.gz"
+DATA="home.tar"
 GRPS="groups.list"
-ENC_ECRYPT="ecrypt.tar.gz"
-ENC_PRIVATE="private.tar.gz"
+ENC_ECRYPT="ecrypt.tar"
+ENC_PRIVATE="private.tar"
 
 if [ `id -u` -ne 0 ];
 then
